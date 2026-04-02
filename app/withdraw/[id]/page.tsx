@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useWallet } from "@/components/WalletContext";
-import { getPiggyBanks, withdraw } from "@/lib/piggybank";
+import { getPiggyBanks, withdrawFromPiggy } from "@/lib/piggybank";
 import { PiggyBank } from "@/types";
 
 export default function WithdrawPage() {
@@ -33,7 +33,7 @@ export default function WithdrawPage() {
     setIsWithdrawing(true);
     setError(null);
     try {
-      await withdraw(walletInstance, bank);
+      await withdrawFromPiggy(walletInstance, bank);
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 2000);
     } catch (e: any) {
