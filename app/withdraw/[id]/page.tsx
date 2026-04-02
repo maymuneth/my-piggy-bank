@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useWallet } from "@/components/WalletContext";
-import { getAllPiggyBanks, withdraw } from "@/lib/piggybank";
+import { getPiggyBanks, withdraw } from "@/lib/piggybank";
 import { PiggyBank } from "@/types";
 
 export default function WithdrawPage() {
@@ -16,7 +16,7 @@ export default function WithdrawPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const all = getAllPiggyBanks();
+    const all = getPiggyBanks();
     const found = all.find(b => b.id === params.id);
     if (found) setBank(found);
     else router.push("/dashboard");
