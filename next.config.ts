@@ -2,16 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        "@hyperlane-xyz/sdk": "./lib/empty.ts",
-        "@hyperlane-xyz/registry": "./lib/empty.ts",
-        "@hyperlane-xyz/utils": "./lib/empty.ts",
-        "@fatsolutions/tongo-sdk": "./lib/empty.ts",
-      },
-    },
-  },
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
