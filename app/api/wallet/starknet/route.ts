@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrivyClient } from "@privy-io/node";
 
-const privy = new PrivyClient(
-  process.env.PRIVY_APP_ID!,
-  process.env.PRIVY_APP_SECRET!
-);
+const privy = new PrivyClient({
+  appId: process.env.PRIVY_APP_ID!,
+  appSecret: process.env.PRIVY_APP_SECRET!,
+});
 
 export async function POST(req: NextRequest) {
   try {
