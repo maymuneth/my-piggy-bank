@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  turbopack: {},
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -13,10 +14,6 @@ const nextConfig: NextConfig = {
       "fs": false,
       "net": false,
       "tls": false,
-    };
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "starknet": require.resolve("starknet"),
     };
     return config;
   },
