@@ -1,10 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrivyClient } from "@privy-io/node";
-
-const privy = new PrivyClient({
-  appId: process.env.PRIVY_APP_ID!,
-  appSecret: process.env.PRIVY_APP_SECRET!,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,28 +7,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Privy API'yi direkt fetch ile çağır
     const accessToken = authHeader.replace("Bearer ", "");
-    const claims = await privy.verifyAuthToken(accessToken);
-    const userId = claims.userId;
 
-    const user = await privy.getUser(userId);
-    const existingWallet = (user as any).linkedAccounts?.find(
-      (acc: any) => acc.type === "wallet" && acc.chainType === "starknet"
+    const response = await fetch("https://auth.privy.io/api/v1/users/me", {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "privy-app-id": process.env.PRIVY_APP_ID!,
+      },
+    });
+
+    if (!response.ok) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const userData = await response.json();
+    
+    // Starknet wallet bul veya oluştur
+    const existingWallet = userData.linked_accounts?.find(
+      (acc: any) => acc.type === "wallet" && acc.chain_type === "starknet"
     );
 
     if (existingWallet) {
       return NextResponse.json({
         wallet: {
           id: existingWallet.id,
-          publicKey: existingWallet.publicKey,
+          publicKey: existingWallet.public_key,
           address: existingWallet.address,
         },
       });
     }
 
-    const newWallet = await (privy as any).wallets().create({
-      chain_type: "starknet",
+    // Yeni wallet oluştur
+    const createRes = await fetch("https://api.privy.io/v1/wallets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "privy-app-id": process.env.PRIVY_APP_ID!,
+        "Authorization": "Basic " + Buffer.from(
+          `${process.env.PRIVY_APP_ID}:${process.env.PRIVY_APP_SECRET}`
+        ).toString("base64"),
+      },
+      body: JSON.stringify({ chain_type: "starknet" }),
     });
+
+    const newWallet = await createRes.json();
 
     return NextResponse.json({
       wallet: {
@@ -44,7 +61,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Wallet creation error:", error);
+    console.error("Wallet error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
