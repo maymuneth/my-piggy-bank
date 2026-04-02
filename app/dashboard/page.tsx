@@ -57,24 +57,9 @@ await starknet.account.execute([{
 
 await new Promise(r => setTimeout(r, 5000));
 
-// Pool member kontrolü — member ise add, değilse enter
-let stakeEntrypoint = "add_to_delegation_pool";
-let stakeCalldata: string[] = [amountHex, "0x0"];
-
-try {
-  const { RpcProvider, Contract } = await import("starknet");
-  const provider = new RpcProvider({ nodeUrl: "https://starknet-mainnet.public.blastapi.io" });
-  const poolAbi = [{ name: "pool_member_info", type: "function", inputs: [{ name: "pool_member", type: "core::starknet::contract_address::ContractAddress" }], outputs: [], state_mutability: "view" }];
-  const poolContract2 = new Contract(poolAbi, poolContract, provider);
-  await poolContract2.pool_member_info(walletAddress);
-  // Başarılı → member var → add kullan
-  stakeEntrypoint = "add_to_delegation_pool";
-  stakeCalldata = [amountHex, "0x0"];
-} catch {
-  // Hata → member yok → enter kullan
-  stakeEntrypoint = "enter_delegation_pool";
-  stakeCalldata = [walletAddress, amountHex];
-}
+// Pool member kontrolü — direkt add dene
+const stakeEntrypoint = "add_to_delegation_pool";
+const stakeCalldata: string[] = [amountHex, "0x0"];
 
 await starknet.account.execute([{
   contractAddress: poolContract,
